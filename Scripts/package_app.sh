@@ -102,6 +102,8 @@ if [[ -d "$BIN_PATH/Sparkle.framework" ]]; then
   resign "$SPARKLE"
 fi
 
+# Permission bits are not part of the code seal — nested signatures stay
+# valid (verified: codesign --verify --deep --strict).
 chmod -R u+w "$APP"
 xattr -cr "$APP"
 find "$APP" -name '._*' -delete
