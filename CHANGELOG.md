@@ -2,6 +2,8 @@
 
 ## 0.2.2 - Unreleased
 
+- Website: "Summon me" demo fires a real attention alert (card + pulsating frame) on the page; one subtle frame-pulse hint per session when the agents section scrolls into view — never uninvited.
+
 ## 0.2.1 - 2026-07-07
 
 - Windows port in `windows/` (C#/.NET 8 WPF): click-through frame/tag/watermark/splash overlays per monitor, real remote-connect splash via WTS session events, tray dashboard, named-pipe CLI (`nameplate attention|splash`), fleet.json compatibility, and hostname-color parity with macOS. Verified on Windows 11 (21 core tests + on-VM overlay/attention proof).

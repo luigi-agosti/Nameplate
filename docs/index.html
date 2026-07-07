@@ -103,6 +103,30 @@ body.no-frame #frame, body.no-tag #tag, body.no-watermark #watermark { display: 
   70% { opacity: 1; }
   100% { opacity: 0; transform: scale(1.02); }
 }
+/* attention alert demo */
+#attention {
+  position: fixed; inset: 0; z-index: 210; display: none;
+  align-items: center; justify-content: center;
+}
+#attention.on { display: flex; cursor: pointer; }
+#attention .acard {
+  background: var(--accent); color: #fff; text-align: center;
+  padding: 30px 44px; border-radius: 20px; max-width: 30rem;
+  box-shadow: 0 30px 90px rgba(0,0,0,.6);
+  animation: acard-in .25s ease;
+}
+#attention .acard .atitle {
+  font-family: var(--font-mono); font-size: 13px; opacity: .8; margin-bottom: 8px;
+}
+#attention .acard .amsg { font-size: 24px; font-weight: 650; line-height: 1.25; }
+#attention .acard .ahint { font-size: 12px; opacity: .7; margin-top: 14px; font-family: var(--font-mono); }
+@keyframes acard-in { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+body.attention-pulse #frame { animation: frame-pulse 1.1s ease-in-out infinite; }
+body.frame-hint #frame { animation: frame-pulse 0.7s ease-in-out 1; }
+@keyframes frame-pulse {
+  0%, 100% { opacity: var(--frame-opacity); }
+  50% { opacity: calc(var(--frame-opacity) * 0.25); }
+}
 /* grain for atmosphere */
 #grain {
   position: fixed; inset: 0; z-index: 95; pointer-events: none; opacity: .35;
@@ -389,6 +413,11 @@ footer a:hover { color: var(--ink); }
 <div id="frame" aria-hidden="true"></div>
 <div id="grain" aria-hidden="true"></div>
 <div id="splash" aria-hidden="true"><div class="card">MEGACLAW</div></div>
+<div id="attention" role="alertdialog" aria-label="Attention alert demo"><div class="acard">
+  <div class="atitle">Codex → 1Password</div>
+  <div class="amsg">Need your approval to continue.</div>
+  <div class="ahint">this is what your agent shows when it needs you — click anywhere to dismiss</div>
+</div></div>
 <div id="tag" contenteditable="true" spellcheck="false" enterkeyhint="done" aria-label="Try your Mac's name">megaclaw</div>
 
 <main>
@@ -549,6 +578,7 @@ nameplate attention \
 
 <span class="c"># replay the identity splash, from ssh too</span>
 notifyutil -p com.steipete.nameplate.splash</pre>
+      <p style="margin-top: 14px;"><button class="btn ghost" id="attnDemo">Summon me</button></p>
     </div>
   </section>
 
@@ -712,6 +742,34 @@ function detectOS(p) {
   return "mac";
 }
 setOS(detectOS(navigator.userAgentData?.platform || navigator.platform));
+
+// attention alert demo: user-triggered only; one soft frame pulse per session as a hint
+const attention = $("attention");
+let attnTimer = null;
+function dismissAttention() {
+  attention.classList.remove("on");
+  document.body.classList.remove("attention-pulse");
+  clearTimeout(attnTimer);
+}
+function showAttention() {
+  attention.classList.add("on");
+  document.body.classList.add("attention-pulse");
+  clearTimeout(attnTimer);
+  attnTimer = setTimeout(dismissAttention, 8000);
+}
+$("attnDemo").addEventListener("click", showAttention);
+attention.addEventListener("click", dismissAttention);
+document.addEventListener("keydown", e => { if (e.key === "Escape") dismissAttention(); });
+if ("IntersectionObserver" in window && !sessionStorage.getItem("np-hinted")) {
+  const hintObserver = new IntersectionObserver(entries => {
+    if (!entries.some(e => e.isIntersecting)) return;
+    sessionStorage.setItem("np-hinted", "1");
+    hintObserver.disconnect();
+    document.body.classList.add("frame-hint");
+    setTimeout(() => document.body.classList.remove("frame-hint"), 800);
+  }, { threshold: 0.4 });
+  hintObserver.observe(document.getElementById("agents"));
+}
 
 // apply on this mac: hand the current config to the app via nameplate://config
 function buildConfigURL() {
