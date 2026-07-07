@@ -1,3 +1,4 @@
+import NameplateCore
 import SwiftUI
 
 /// A grouped-form slider row: leading label, continuous slider, trailing
@@ -19,6 +20,59 @@ struct SliderRow: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 48, alignment: .trailing)
         }
+    }
+}
+
+/// Four mini corner-diagram buttons: each shows a square rounded only at its
+/// corner; filled accent when that screen corner is rounded.
+@MainActor
+struct CornerRoundingControl: View {
+    @ObservedObject var settings: AppSettings
+
+    var body: some View {
+        HStack(spacing: 8) {
+            CornerToggleButton(corner: .topLeft, isOn: self.$settings.frameRoundTopLeft)
+            CornerToggleButton(corner: .topRight, isOn: self.$settings.frameRoundTopRight)
+            CornerToggleButton(corner: .bottomLeft, isOn: self.$settings.frameRoundBottomLeft)
+            CornerToggleButton(corner: .bottomRight, isOn: self.$settings.frameRoundBottomRight)
+        }
+    }
+}
+
+@MainActor
+private struct CornerToggleButton: View {
+    let corner: ScreenCorner
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Button {
+            self.isOn.toggle()
+        } label: {
+            self.shape
+                .strokeBorder(
+                    self.isOn ? Color.accentColor : Color.secondary.opacity(0.45),
+                    lineWidth: 2)
+                .background {
+                    if self.isOn {
+                        self.shape.fill(Color.accentColor.opacity(0.2))
+                    }
+                }
+                .frame(width: 22, height: 22)
+        }
+        .buttonStyle(.plain)
+        .help("\(self.corner.label) rounded")
+        .accessibilityLabel("\(self.corner.label) rounded")
+        .accessibilityValue(self.isOn ? "on" : "off")
+    }
+
+    private var shape: UnevenRoundedRectangle {
+        let radius: CGFloat = 9
+        return UnevenRoundedRectangle(
+            topLeadingRadius: self.corner == .topLeft ? radius : 2,
+            bottomLeadingRadius: self.corner == .bottomLeft ? radius : 2,
+            bottomTrailingRadius: self.corner == .bottomRight ? radius : 2,
+            topTrailingRadius: self.corner == .topRight ? radius : 2,
+            style: .continuous)
     }
 }
 

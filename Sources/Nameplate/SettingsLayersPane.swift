@@ -16,10 +16,13 @@ struct LayersSettingsPane: View {
                         range: 2...12,
                         format: { "\(Int($0)) pt" })
                     SliderRow(
-                        title: "Corners",
+                        title: "Corner radius",
                         value: self.$settings.frameCornerRadius,
                         range: 0...40,
                         format: { "\(Int($0)) pt" })
+                    LabeledContent("Rounded corners") {
+                        CornerRoundingControl(settings: self.settings)
+                    }
                     SliderRow(
                         title: "Opacity",
                         value: self.$settings.frameOpacity,

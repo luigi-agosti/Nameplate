@@ -19,7 +19,13 @@ final class AppSettings: ObservableObject {
     @AppStorage("frameThickness") var frameThickness: Double = 4
     @AppStorage("frameOpacity") var frameOpacity: Double = 1.0
     // Modern Mac displays have rounded corners; a square frame looks clipped.
+    // Per-corner control: default rounds only the bottom, where nothing else
+    // competes with the border (menu bar owns the top).
     @AppStorage("frameCornerRadius") var frameCornerRadius: Double = 16
+    @AppStorage("frameRoundTopLeft") var frameRoundTopLeft: Bool = false
+    @AppStorage("frameRoundTopRight") var frameRoundTopRight: Bool = false
+    @AppStorage("frameRoundBottomLeft") var frameRoundBottomLeft: Bool = true
+    @AppStorage("frameRoundBottomRight") var frameRoundBottomRight: Bool = true
 
     // Name tag layer.
     @AppStorage("tagEnabled") var tagEnabled: Bool = true

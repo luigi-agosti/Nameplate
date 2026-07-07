@@ -12,6 +12,19 @@ extension ScreenCorner {
     }
 }
 
+extension AppSettings {
+    /// The frame shape honoring the per-corner rounding switches.
+    func frameShape(scale: CGFloat = 1) -> UnevenRoundedRectangle {
+        let radius = self.frameCornerRadius * scale
+        return UnevenRoundedRectangle(
+            topLeadingRadius: self.frameRoundTopLeft ? radius : 0,
+            bottomLeadingRadius: self.frameRoundBottomLeft ? radius : 0,
+            bottomTrailingRadius: self.frameRoundBottomRight ? radius : 0,
+            topTrailingRadius: self.frameRoundTopRight ? radius : 0,
+            style: .continuous)
+    }
+}
+
 /// Full-screen transparent content: frame border, name tag, watermark.
 /// Everything is drawn on top of whatever wallpaper and windows are there —
 /// Nameplate never touches the actual desktop background.
@@ -22,7 +35,7 @@ struct OverlayView: View {
         let identity = self.settings.identity
         ZStack {
             if self.settings.frameEnabled {
-                RoundedRectangle(cornerRadius: self.settings.frameCornerRadius, style: .continuous)
+                self.settings.frameShape()
                     .strokeBorder(
                         identity.color.opacity(self.settings.frameOpacity),
                         lineWidth: self.settings.frameThickness)

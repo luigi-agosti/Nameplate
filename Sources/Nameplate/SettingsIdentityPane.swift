@@ -170,9 +170,7 @@ struct IdentityPreviewCard: View {
             }
 
             if self.settings.frameEnabled {
-                RoundedRectangle(
-                    cornerRadius: max(10, self.settings.frameCornerRadius * 0.6),
-                    style: .continuous)
+                self.settings.frameShape(scale: 0.6)
                     .strokeBorder(
                         identity.color.opacity(self.settings.frameOpacity),
                         lineWidth: max(2, self.settings.frameThickness * 0.75))
