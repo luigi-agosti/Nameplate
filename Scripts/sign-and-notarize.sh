@@ -47,4 +47,7 @@ xcrun stapler staple "$APP_BUNDLE"
 spctl -a -t exec -vv "$APP_BUNDLE"
 stapler validate "$APP_BUNDLE"
 
+# Stable-name copy so releases/latest/download/Nameplate.zip always works.
+cp "$ZIP_NAME" "Nameplate.zip"
+
 echo "Done: $ZIP_NAME"
