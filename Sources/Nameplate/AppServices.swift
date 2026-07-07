@@ -85,6 +85,12 @@ final class AppServices {
             guard let request = AttentionRequest.consume() else { return }
             services.attention?.show(request)
         }
+
+        // Darwin notifications are not queued: a CLI-triggered cold launch can
+        // post before our observer exists. Pick up anything already on disk.
+        if let pending = AttentionRequest.consume() {
+            self.attention?.show(pending)
+        }
     }
 
     private func registerDarwinTrigger(name: String, action: @escaping @MainActor (AppServices) -> Void) {

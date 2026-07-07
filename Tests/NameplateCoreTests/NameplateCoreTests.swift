@@ -72,6 +72,41 @@ struct MacIdentityTests {
     }
 }
 
+@Suite("AttentionRequest")
+struct AttentionRequestTests {
+    private func temporaryURL() -> URL {
+        FileManager.default.temporaryDirectory
+            .appending(path: "attention-\(UUID().uuidString).json")
+    }
+
+    @Test func roundTripsAndConsumesOnce() throws {
+        let url = self.temporaryURL()
+        let request = AttentionRequest(
+            title: "Codex → 1Password",
+            message: "Need approval",
+            duration: 8,
+            color: "#1D9E75",
+            createdAt: Date())
+        try request.write(to: url)
+        #expect(AttentionRequest.consume(from: url) == request)
+        #expect(AttentionRequest.consume(from: url) == nil)
+    }
+
+    @Test func dropsStaleRequests() throws {
+        let url = self.temporaryURL()
+        let request = AttentionRequest(message: "old news", createdAt: Date(timeIntervalSinceNow: -600))
+        try request.write(to: url)
+        #expect(AttentionRequest.consume(from: url) == nil)
+        #expect(!FileManager.default.fileExists(atPath: url.path))
+    }
+
+    @Test func keepsUndatedRequests() throws {
+        let url = self.temporaryURL()
+        try AttentionRequest(message: "no timestamp").write(to: url)
+        #expect(AttentionRequest.consume(from: url)?.message == "no timestamp")
+    }
+}
+
 @Suite("FleetFile")
 struct FleetFileTests {
     @Test func parsesAndNormalizesKeys() throws {

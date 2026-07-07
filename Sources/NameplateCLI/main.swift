@@ -30,11 +30,13 @@ func usage() -> Never {
 }
 
 /// The app must be running to render anything; launch it if needed.
-func ensureAppRunning() {
+/// Returns true when the app had to be cold-launched.
+@discardableResult
+func ensureAppRunning() -> Bool {
     let running = NSWorkspace.shared.runningApplications.contains {
         $0.bundleIdentifier?.hasPrefix(bundleID) == true
     }
-    if running { return }
+    if running { return false }
 
     guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
         fail("Nameplate.app is not installed (bundle id \(bundleID) not found).")
@@ -48,6 +50,19 @@ func ensureAppRunning() {
     _ = semaphore.wait(timeout: .now() + 5)
     // Give the fresh instance a beat to register its notification listeners.
     Thread.sleep(forTimeInterval: 0.8)
+    return true
+}
+
+/// Darwin notifications are not queued; on a cold launch the app might still
+/// be starting when the first post fires. The app consumes attention requests
+/// from disk at startup, and for the notification-only commands we simply
+/// post again after a grace period.
+func post(_ name: String, retryAfterColdLaunch coldLaunched: Bool) {
+    notify_post(name)
+    if coldLaunched {
+        Thread.sleep(forTimeInterval: 1.5)
+        notify_post(name)
+    }
 }
 
 var arguments = Array(CommandLine.arguments.dropFirst())
@@ -84,21 +99,28 @@ case "attention":
     let message = messageParts.joined(separator: " ")
     guard !message.isEmpty else { fail("attention needs a message — say why you need the human.") }
 
-    ensureAppRunning()
     do {
-        try AttentionRequest(title: title, message: message, duration: duration, color: color).write()
+        try AttentionRequest(
+            title: title,
+            message: message,
+            duration: duration,
+            color: color,
+            createdAt: Date()).write()
     } catch {
         fail("could not write attention request: \(error.localizedDescription)")
     }
+    // On a cold launch the app consumes the request file at startup, so a
+    // missed notification cannot drop the alert.
+    ensureAppRunning()
     notify_post(AttentionRequest.notificationName)
 
 case "splash":
-    ensureAppRunning()
-    notify_post("com.steipete.nameplate.splash")
+    let coldLaunched = ensureAppRunning()
+    post("com.steipete.nameplate.splash", retryAfterColdLaunch: coldLaunched)
 
 case "settings":
-    ensureAppRunning()
-    notify_post("com.steipete.nameplate.settings")
+    let coldLaunched = ensureAppRunning()
+    post("com.steipete.nameplate.settings", retryAfterColdLaunch: coldLaunched)
 
 case "--help", "-h", "help":
     usage()
