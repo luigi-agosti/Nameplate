@@ -1,6 +1,6 @@
 # Nameplate
 
-**Brand every Mac in your fleet so you always know which one you just remoted into.**
+**Brand every machine in your fleet — macOS, Windows, and Linux — so you always know which one you just remoted into.**
 
 If you drive a herd of Macs over [Jump Desktop](https://jumpdesktop.com/), Screen Sharing, or any other remote desktop, the screens all look the same. Nameplate gives each Mac an unmistakable identity — like an aircraft livery — rendered as click-through overlays that float above everything:
 
@@ -19,13 +19,19 @@ Each Mac gets a stable default color derived from its hostname, so even an uncon
 
 ## Install
 
-Download the [DMG](https://github.com/steipete/Nameplate/releases/latest/download/Nameplate.dmg) (drag to install), or:
+**macOS** — download the [DMG](https://github.com/steipete/Nameplate/releases/latest/download/Nameplate.dmg) (drag to install), or:
 
 ```sh
 brew install --cask steipete/tap/nameplate
 ```
 
-Or build from source (requires Xcode 26 / Swift 6.2+):
+**Windows** — grab [Nameplate-Windows-x64.zip](https://github.com/steipete/Nameplate/releases/latest/download/Nameplate-Windows-x64.zip) (or `arm64`) from the latest release: a single self-contained `nameplate.exe` (tray app + CLI in one binary). Source lives in [`windows/`](windows/).
+
+**Linux** — grab [Nameplate-Linux-x86_64.tar.gz](https://github.com/steipete/Nameplate/releases/latest/download/Nameplate-Linux-x86_64.tar.gz) (or `arm64`) from the latest release; requires `libgtk-4`, built for X11 fleets (xrdp/VNC), Wayland best-effort. Source lives in [`linux/`](linux/).
+
+All three share the same fleet file, the same hostname-derived default colors, and the same `nameplate attention` / `nameplate splash` CLI.
+
+Or build the Mac app from source (requires Xcode 26 / Swift 6.2+):
 
 ```sh
 git clone https://github.com/steipete/Nameplate.git

@@ -206,6 +206,63 @@ pre .a { color: var(--accent); transition: color .45s ease; }
 .two-col .copy p strong { color: var(--ink); font-weight: 600; }
 
 /* ---------- live settings window ---------- */
+.os-toggle {
+  display: inline-flex; margin: 36px 0 18px; border: 1px solid #2c3136;
+  border-radius: 999px; overflow: hidden;
+}
+.os-toggle button {
+  background: transparent; border: 0; color: var(--ink-dim); cursor: pointer;
+  font-family: var(--font-mono); font-size: 13px; padding: 9px 20px;
+}
+.os-toggle button + button { border-left: 1px solid #2c3136; }
+.os-toggle button.on { background: var(--accent); color: #fff; }
+/* window controls hidden by default; skins toggle them */
+.mac-window .wctrl, .mac-window .adwclose { display: none; }
+/* ---- Windows 11 skin ---- */
+.mac-window[data-os="windows"] {
+  font-family: "Segoe UI", -apple-system, sans-serif;
+  border-radius: 8px; background: #202020; border-color: #1a1a1a;
+}
+.mac-window[data-os="windows"] .titlebar {
+  justify-content: flex-start; padding-left: 16px; background: #202020;
+  border-bottom-color: #191919; font-weight: 400; font-size: 12px; height: 36px;
+}
+.mac-window[data-os="windows"] .dots { display: none; }
+.mac-window[data-os="windows"] .wctrl {
+  display: flex; position: absolute; right: 0; top: 0; height: 36px;
+}
+.mac-window[data-os="windows"] .wctrl i {
+  font-style: normal; width: 46px; display: flex; align-items: center;
+  justify-content: center; font-size: 11px; color: #cfcfcf;
+}
+.mac-window[data-os="windows"] .wctrl i:last-child:hover { background: #c42b1c; }
+.mac-window[data-os="windows"] .toolbar { background: #202020; border-bottom-color: #191919; }
+.mac-window[data-os="windows"] .tab { border-radius: 4px; }
+.mac-window[data-os="windows"] .tab.active { background: #2d2d2d; color: #60cdff; box-shadow: inset 0 -2px 0 #60cdff; }
+.mac-window[data-os="windows"] .sgroup { border-radius: 4px; background: #2b2b2b; border-color: #1f1f1f; }
+.mac-window[data-os="windows"] .btn-small, .mac-window[data-os="windows"] .seg { border-radius: 4px; }
+.mac-window[data-os="windows"] .mini-screen { border-radius: 4px; }
+.mac-window[data-os="windows"] .winfooter { background: #202020; border-top-color: #191919; }
+/* ---- Linux (Adwaita) skin ---- */
+.mac-window[data-os="linux"] {
+  font-family: Cantarell, "DejaVu Sans", Ubuntu, sans-serif;
+  border-radius: 14px; background: #242424; border-color: #383838;
+}
+.mac-window[data-os="linux"] .titlebar {
+  background: #303030; border-bottom-color: #1c1c1c; font-weight: 700; height: 46px;
+}
+.mac-window[data-os="linux"] .dots { display: none; }
+.mac-window[data-os="linux"] .adwclose {
+  display: flex; position: absolute; right: 10px; top: 8px;
+  width: 28px; height: 28px; border-radius: 50%; background: #444;
+  align-items: center; justify-content: center; font-size: 12px; color: #eee;
+}
+.mac-window[data-os="linux"] .toolbar { background: #303030; border-bottom-color: #1c1c1c; }
+.mac-window[data-os="linux"] .tab { border-radius: 999px; padding: 6px 14px; }
+.mac-window[data-os="linux"] .tab.active { background: #4a4a4a; color: #fff; }
+.mac-window[data-os="linux"] .sgroup { border-radius: 12px; background: #303030; border-color: #1f1f1f; }
+.mac-window[data-os="linux"] .btn-small { border-radius: 999px; }
+.mac-window[data-os="linux"] .winfooter { background: #303030; border-top-color: #1c1c1c; }
 .mac-window {
   max-width: 560px; margin: 44px auto 0;
   background: #212528; border: 1px solid #35393d; border-radius: 12px;
@@ -342,8 +399,8 @@ footer a:hover { color: var(--ink); }
   </header>
 
   <section class="hero">
-    <h1>Never wonder <em>which Mac</em> you just remoted into.</h1>
-    <p class="sub">Nameplate brands every Mac in your fleet with an unmistakable identity — a colored frame, a name tag, a watermark, a connect splash. All click-through overlays. Your wallpaper stays untouched, and fullscreen apps can't hide it.</p>
+    <h1>Never wonder <em>which machine</em> you just remoted into.</h1>
+    <p class="sub">Nameplate brands every machine in your fleet — macOS, Windows, and Linux — with an unmistakable identity — a colored frame, a name tag, a watermark, a connect splash. All click-through overlays. Your wallpaper stays untouched, and fullscreen apps can't hide it.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/steipete/Nameplate/releases/latest/download/Nameplate.dmg">Download for Mac</a>
       <button class="btn ghost" id="replay">Replay connect splash</button>
@@ -358,8 +415,13 @@ footer a:hover { color: var(--ink); }
     <div class="kicker">The settings</div>
     <h2>Don't screenshot it. Click it.</h2>
     <p style="color: var(--ink-dim); max-width: 54ch; font-size: 16px;">A faithful remake of the real Settings window — and it's live. Everything you change here restyles the nameplate this page is wearing.</p>
-    <div class="mac-window" id="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span>Identity</div>
+    <div class="os-toggle" id="osToggle" role="tablist" aria-label="Preview operating system">
+      <button data-os="mac">&#63743; macOS</button>
+      <button data-os="windows">&#8862; Windows</button>
+      <button data-os="linux">&#128039; Linux</button>
+    </div>
+    <div class="mac-window" id="win" data-os="mac">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span id="winTitle">Identity</span><span class="wctrl" aria-hidden="true"><i>&#x2015;</i><i>&#x25A1;</i><i>&#x2715;</i></span><span class="adwclose" aria-hidden="true">&#x2715;</span></div>
       <div class="toolbar">
         <button class="tab active" data-pane="identity"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="11" r="2.2"/><path d="M5.5 17c.8-2 2-3 3.5-3s2.7 1 3.5 3M14 9h4M14 13h4"/></svg>Identity</button>
         <button class="tab" data-pane="layers"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>Layers</button>
@@ -375,7 +437,7 @@ footer a:hover { color: var(--ink); }
           <div class="srow"><label for="setGlyph">Glyph</label><span class="ctl"><input type="text" id="setGlyph" placeholder="Optional, e.g. 🦞" maxlength="4"></span></div>
           <div class="srow"><span>Color</span><span class="ctl" id="setSwatches"></span></div>
         </div>
-        <div class="scaption">How this Mac announces itself. Leave the name empty to use the computer name.</div>
+        <div class="scaption">How this machine announces itself. Leave the name empty to use the computer name.</div>
       </div>
 
       <div class="pane" id="pane-layers">
@@ -424,7 +486,7 @@ footer a:hover { color: var(--ink); }
       <div class="pane about-pane" id="pane-about">
         <img src="icon.png" alt="Nameplate app icon">
         <h4>Nameplate</h4>
-        <p>Version 0.2.0 · MIT · © 2026 Peter Steinberger</p>
+        <p>Version 0.2.1 · MIT · © 2026 Peter Steinberger</p>
         <a href="https://github.com/steipete/Nameplate/releases/latest/download/Nameplate.dmg">Download</a> · <a href="https://github.com/steipete/Nameplate">GitHub</a>
       </div>
       <div class="winfooter">
@@ -436,7 +498,7 @@ footer a:hover { color: var(--ink); }
 
   <section id="layers">
     <div class="kicker">The layers</div>
-    <h2>An aircraft livery for your Mac.</h2>
+    <h2>An aircraft livery for your machines.</h2>
     <div class="grid">
       <div class="card"><h3><span class="n">01</span>Frame</h3><p>A colored border around every display, rounded corners following the screen's curve. Always visible, costs zero pixels of workspace, survives fullscreen apps.</p></div>
       <div class="card"><h3><span class="n">02</span>Name tag</h3><p>A small pill with the Mac's name and an optional emoji glyph, pinned to a corner. Like the one at the bottom of this page.</p></div>
@@ -488,18 +550,20 @@ notifyutil -p com.steipete.nameplate.splash</pre>
 
   <section id="install">
     <div class="kicker">Install</div>
-    <h2>One brew away.</h2>
+    <h2>Mac, Windows, Linux. Same livery.</h2>
     <div class="two-col">
       <div class="copy">
-        <p>Requires <strong>Xcode 26 / Swift 6.2+</strong>. Release builds auto-update via Sparkle.</p>
+        <p>One product, three platforms — same fleet file, same colors, same CLI. macOS release builds auto-update via Sparkle.</p>
         <p>MIT licensed. No accounts, no telemetry, no network calls except the update check.</p>
       </div>
-      <pre><span class="c"># Homebrew</span>
-brew install --cask steipete/tap/nameplate
+      <pre><span class="c"># macOS</span>
+brew install --cask steipete/tap/nameplate   <span class="c"># or the DMG</span>
 
-<span class="c"># or from source (Xcode 26 / Swift 6.2+)</span>
-git clone https://github.com/steipete/Nameplate.git
-cd Nameplate && ./Scripts/package_app.sh release</pre>
+<span class="c"># Windows (x64/arm64) — tray app + CLI, one exe</span>
+Nameplate-Windows-x64.zip from the latest release
+
+<span class="c"># Linux (X11 fleets; deps: libgtk-4)</span>
+Nameplate-Linux-x86_64.tar.gz from the latest release</pre>
     </div>
   </section>
 
@@ -579,11 +643,10 @@ $("setSplashD").addEventListener("input", e => {
 
 // settings window tabs
 const win = $("win");
-const titlebar = win.querySelector(".titlebar");
 win.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
   win.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
   win.querySelectorAll(".pane").forEach(p => p.classList.toggle("active", p.id === "pane-" + t.dataset.pane));
-  titlebar.lastChild.textContent = t.textContent;
+  document.getElementById("winTitle").textContent = t.textContent;
 }));
 
 // layers: frame sliders + per-corner rounding
@@ -619,6 +682,30 @@ $("setTagCorner").querySelectorAll("button").forEach(b => b.addEventListener("cl
   miniTag.classList.remove("tl", "tr", "bl", "br");
   if (b.dataset.c !== "bl") { tag.classList.add(b.dataset.c); miniTag.classList.add(b.dataset.c); }
 }));
+
+// os skins: auto-detect, toggle, and adapt the download button
+const DOWNLOADS = {
+  mac: ["Download for Mac", "https://github.com/steipete/Nameplate/releases/latest/download/Nameplate.dmg"],
+  windows: ["Download for Windows", "https://github.com/steipete/Nameplate/releases/latest/download/Nameplate-Windows-x64.zip"],
+  linux: ["Download for Linux", "https://github.com/steipete/Nameplate/releases/latest/download/Nameplate-Linux-x86_64.tar.gz"],
+};
+const heroDownload = document.querySelector(".hero .btn.primary");
+function setOS(os) {
+  win.dataset.os = os;
+  document.querySelectorAll("#osToggle button").forEach(b => b.classList.toggle("on", b.dataset.os === os));
+  const [label, href] = DOWNLOADS[os];
+  heroDownload.textContent = label;
+  heroDownload.href = href;
+  document.getElementById("applyOnMac").textContent = os === "mac" ? "Apply on this Mac" : "Apply on this machine";
+}
+document.querySelectorAll("#osToggle button").forEach(b => b.addEventListener("click", () => setOS(b.dataset.os)));
+const detectedOS = (() => {
+  const p = (navigator.userAgentData?.platform || navigator.platform || "").toLowerCase();
+  if (p.includes("win")) return "windows";
+  if (p.includes("linux") || p.includes("x11")) return "linux";
+  return "mac";
+})();
+setOS(detectedOS);
 
 // apply on this mac: hand the current config to the app via nameplate://config
 function buildConfigURL() {
