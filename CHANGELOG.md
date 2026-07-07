@@ -2,7 +2,7 @@
 
 ## 0.1.1 - Unreleased
 
-- Project website in `docs/`, served at [nameplate.dev](https://nameplate.dev) via GitHub Pages.
+- Project website in `docs/`, served at [nameplate.sh](https://nameplate.sh) via GitHub Pages.
 
 ## 0.1.0 - 2026-07-07
 
