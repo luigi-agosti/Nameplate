@@ -6,6 +6,7 @@
 - Status menu doubles as a dashboard: uptime, IP address (click to copy), CPU load, RAM, free disk, and layer toggles.
 - Frame corner rounding is configurable per corner (radius slider + corner toggles); default rounds only the bottom corners.
 - Agent skill for attention alerts ships in `skills/nameplate-attention/`.
+- Decoration visibility mode: show frame/tag/watermark/splash always, or only when viewed remotely (virtual display detected or Screen Sharing/VNC connected); attention alerts are exempt.
 - Native grouped settings (System Settings style): Identity, Layers, Splash, General, and About panes with a live preview.
 - Fleet file support (`~/.config/nameplate/fleet.json`) to brand every Mac from one synced dotfile.
 - Bundled `nameplate` CLI: `attention` (topmost message card + pulsating borders for agents that need the human), `splash`, and `settings`.

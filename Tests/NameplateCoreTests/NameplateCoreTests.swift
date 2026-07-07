@@ -72,6 +72,46 @@ struct MacIdentityTests {
     }
 }
 
+@Suite("RemoteViewing")
+struct RemoteViewingTests {
+    @Test func classifiesJumpDesktopDisplay() {
+        // Real values captured from a Jump Desktop virtual display.
+        #expect(RemoteViewing.isVirtualDisplay(
+            name: "Jump Desktop Display 1", vendorNumber: 0x7035_7379, isBuiltin: false))
+        #expect(RemoteViewing.isVirtualDisplay(
+            name: "Some Display", vendorNumber: 0x7035_7379, isBuiltin: false))
+        #expect(RemoteViewing.isVirtualDisplay(
+            name: "Jump Desktop Display 2", vendorNumber: 0, isBuiltin: false))
+    }
+
+    @Test func classifiesPhysicalDisplays() {
+        #expect(!RemoteViewing.isVirtualDisplay(
+            name: "Built-in Retina Display", vendorNumber: 0x610, isBuiltin: true))
+        #expect(!RemoteViewing.isVirtualDisplay(
+            name: "LG UltraFine", vendorNumber: 0x1E6D, isBuiltin: false))
+        // Builtin wins even with a marker-like name.
+        #expect(!RemoteViewing.isVirtualDisplay(
+            name: "Virtual Display", vendorNumber: 0x610, isBuiltin: true))
+    }
+
+    @Test func detectsEstablishedScreenSharing() {
+        let active = """
+        Active Internet connections (including servers)
+        Proto Recv-Q Send-Q  Local Address          Foreign Address        (state)
+        tcp4       0      0  192.168.0.10.5900      192.168.0.20.53211     ESTABLISHED
+        tcp4       0      0  *.5900                 *.*                    LISTEN
+        """
+        #expect(RemoteViewing.hasEstablishedScreenSharing(netstatOutput: active))
+
+        let listenOnly = """
+        tcp4       0      0  *.5900                 *.*                    LISTEN
+        tcp4       0      0  192.168.0.10.59001     1.2.3.4.443            ESTABLISHED
+        tcp4       0      0  192.168.0.10.5900      1.2.3.4.53211          TIME_WAIT
+        """
+        #expect(!RemoteViewing.hasEstablishedScreenSharing(netstatOutput: listenOnly))
+    }
+}
+
 @Suite("AttentionRequest")
 struct AttentionRequestTests {
     private func temporaryURL() -> URL {

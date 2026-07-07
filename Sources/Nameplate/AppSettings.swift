@@ -4,6 +4,20 @@ import ServiceManagement
 import SwiftUI
 import SystemConfiguration
 
+enum DecorationVisibility: String, CaseIterable, Identifiable {
+    case always
+    case remoteOnly
+
+    var id: String { self.rawValue }
+
+    var label: String {
+        switch self {
+        case .always: "Always"
+        case .remoteOnly: "Only when viewed remotely"
+        }
+    }
+}
+
 @MainActor
 final class AppSettings: ObservableObject {
     // Identity — empty string means "derive from hostname".
@@ -13,6 +27,16 @@ final class AppSettings: ObservableObject {
 
     // Master switch, mirrored as the top toggle in the menu.
     @AppStorage("overlaysEnabled") var overlaysEnabled: Bool = true
+
+    // "Always" or only when this Mac is being viewed remotely (virtual
+    // display present or Screen Sharing/VNC connected). Gates all decoration;
+    // attention alerts always show.
+    @AppStorage("visibilityModeRaw") private var visibilityModeRaw: String = DecorationVisibility.always.rawValue
+
+    var visibilityMode: DecorationVisibility {
+        get { DecorationVisibility(rawValue: self.visibilityModeRaw) ?? .always }
+        set { self.visibilityModeRaw = newValue.rawValue }
+    }
 
     // Frame layer.
     @AppStorage("frameEnabled") var frameEnabled: Bool = true

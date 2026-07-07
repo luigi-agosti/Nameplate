@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import NameplateCore
 import notify
 
@@ -14,6 +15,8 @@ final class AppServices {
     private var statusItem: StatusItemController?
     private var settingsWindow: SettingsWindowController?
     private(set) var updater: UpdaterProviding?
+    private let remoteMonitor = RemoteViewMonitor()
+    private var settingsCancellable: AnyCancellable?
 
     init(settings: AppSettings) {
         self.settings = settings
@@ -30,16 +33,40 @@ final class AppServices {
         self.settingsWindow?.show(tab: tab)
     }
 
+    /// In remote-only mode, decoration exists when a virtual display is
+    /// present or someone is screen-shared in. Attention alerts ignore this.
+    private var decorationVisibleAnywhere: Bool {
+        switch self.settings.visibilityMode {
+        case .always:
+            true
+        case .remoteOnly:
+            RemoteViewMonitor.anyVirtualScreen() || self.remoteMonitor.screenSharingActive
+        }
+    }
+
     func start() {
         guard self.monitor == nil else { return }
         let settings = self.settings
-        self.overlay = OverlayController(settings: settings)
+        self.overlay = OverlayController(settings: settings, remoteMonitor: self.remoteMonitor)
         self.splash = SplashController(settings: settings)
         self.attention = AttentionController(settings: settings)
         self.statusItem = StatusItemController(settings: settings, services: self)
         self.updater = makeUpdaterController(settings: settings)
         let monitor = ConnectionMonitor()
         self.monitor = monitor
+
+        self.remoteMonitor.onChange = { [weak self] in
+            self?.overlay?.applyVisibility()
+        }
+        self.remoteMonitor.setPollingEnabled(settings.visibilityMode == .remoteOnly)
+        self.settingsCancellable = settings.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    self.remoteMonitor.setPollingEnabled(self.settings.visibilityMode == .remoteOnly)
+                }
+            }
 
         monitor.onTrigger = { [weak self, weak settings] trigger in
             guard let self, let settings else { return }
@@ -48,7 +75,7 @@ final class AppServices {
             case .unlock: settings.splashOnUnlock
             case .displayChange: settings.splashOnDisplayChange
             }
-            if wanted {
+            if wanted, self.decorationVisibleAnywhere {
                 self.splash?.show()
             }
         }

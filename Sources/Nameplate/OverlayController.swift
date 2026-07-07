@@ -30,16 +30,18 @@ enum OverlayPanelFactory {
 
 /// Owns one overlay panel per screen and keeps them alive across display
 /// reconfiguration. The SwiftUI content observes AppSettings directly, so the
-/// controller only manages panel lifecycle and overall visibility.
+/// controller only manages panel lifecycle and per-screen visibility.
 @MainActor
 final class OverlayController {
     private let settings: AppSettings
-    private var panels: [NSPanel] = []
+    private let remoteMonitor: RemoteViewMonitor
+    private var panels: [(panel: NSPanel, screen: NSScreen)] = []
     private var cancellable: AnyCancellable?
     // App-lifetime object: observers are registered once and never removed.
 
-    init(settings: AppSettings) {
+    init(settings: AppSettings, remoteMonitor: RemoteViewMonitor) {
         self.settings = settings
+        self.remoteMonitor = remoteMonitor
         self.rebuildPanels()
 
         // objectWillChange fires before the write lands; hop once so we read
@@ -63,13 +65,22 @@ final class OverlayController {
         }
     }
 
-    private var shouldBeVisible: Bool {
-        self.settings.overlaysEnabled
-            && (self.settings.frameEnabled || self.settings.tagEnabled || self.settings.watermarkEnabled)
+    private var anyLayerEnabled: Bool {
+        self.settings.frameEnabled || self.settings.tagEnabled || self.settings.watermarkEnabled
+    }
+
+    private func shouldShow(on screen: NSScreen) -> Bool {
+        guard self.settings.overlaysEnabled, self.anyLayerEnabled else { return false }
+        switch self.settings.visibilityMode {
+        case .always:
+            return true
+        case .remoteOnly:
+            return RemoteViewMonitor.isVirtual(screen: screen) || self.remoteMonitor.screenSharingActive
+        }
     }
 
     func rebuildPanels() {
-        for panel in self.panels {
+        for (panel, _) in self.panels {
             panel.close()
         }
         self.panels = NSScreen.screens.map { screen in
@@ -79,15 +90,14 @@ final class OverlayController {
             let panel = OverlayPanelFactory.makePanel(for: screen, level: .statusBar)
             panel.contentView = NSHostingView(rootView: OverlayView(settings: self.settings))
             panel.setFrame(screen.frame, display: true)
-            return panel
+            return (panel, screen)
         }
         self.applyVisibility()
     }
 
     func applyVisibility() {
-        let visible = self.shouldBeVisible
-        for panel in self.panels {
-            if visible {
+        for (panel, screen) in self.panels {
+            if self.shouldShow(on: screen) {
                 if !panel.isVisible {
                     panel.orderFrontRegardless()
                 }

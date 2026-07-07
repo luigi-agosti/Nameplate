@@ -5,6 +5,12 @@ import SwiftUI
 struct GeneralSettingsPane: View {
     @ObservedObject var settings: AppSettings
 
+    private var visibilityBinding: Binding<DecorationVisibility> {
+        Binding(
+            get: { self.settings.visibilityMode },
+            set: { self.settings.visibilityMode = $0 })
+    }
+
     var body: some View {
         Form {
             Section {
@@ -37,8 +43,18 @@ struct GeneralSettingsPane: View {
                     title: "Show overlays",
                     caption: "Turns the frame, name tag, and watermark off at once.",
                     isOn: self.$settings.overlaysEnabled)
+                Picker("Show decoration", selection: self.visibilityBinding) {
+                    ForEach(DecorationVisibility.allCases) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .disabled(!self.settings.overlaysEnabled)
             } header: {
                 Text("Overlays")
+            } footer: {
+                Text("\"Only when viewed remotely\" shows frame, tag, watermark, and splash only on "
+                    + "virtual displays (Jump Desktop and similar) or while a Screen Sharing/VNC "
+                    + "connection is active. Attention alerts always show.")
             }
 
             Section {
