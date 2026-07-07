@@ -2,6 +2,8 @@
 
 ## 0.1.2 - Unreleased
 
+- Website: the settings screenshot is now a live interactive remake of the Settings window — tabs work, and Identity/Layers/Splash/General controls restyle the nameplate the page itself wears.
+
 ## 0.1.1 - 2026-07-07
 
 - Project website in `docs/`, served at [nameplate.sh](https://nameplate.sh) via GitHub Pages.

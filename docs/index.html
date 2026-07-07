@@ -22,6 +22,9 @@
   --ink-dim: #8f918f;
   --frame-w: 5px;
   --radius: 22px;
+  --r-tl: 0px; --r-tr: 0px; --r-br: 22px; --r-bl: 22px;
+  --frame-opacity: 1;
+  --wm-opacity: .05;
   --font-display: "Bricolage Grotesque", sans-serif;
   --font-mono: "Fragment Mono", monospace;
 }
@@ -42,11 +45,12 @@ body {
   position: fixed; inset: 0; z-index: 90; pointer-events: none;
   border: var(--frame-w) solid var(--accent);
   /* app default: bottom corners round, top straight — the menu bar owns the top */
-  border-radius: 0 0 var(--radius) var(--radius);
+  border-radius: var(--r-tl) var(--r-tr) var(--r-br) var(--r-bl);
+  opacity: var(--frame-opacity);
   transition: border-color .45s ease;
 }
 #tag {
-  position: fixed; left: 22px; bottom: 20px; z-index: 91;
+  position: fixed; left: 22px; bottom: 20px; right: auto; top: auto; z-index: 91;
   background: var(--accent); color: #fff;
   font-family: var(--font-mono); font-size: 13px;
   padding: 5px 14px; border-radius: 999px;
@@ -55,6 +59,10 @@ body {
   outline: none; cursor: text; white-space: nowrap;
 }
 #tag:empty::before { content: "megaclaw"; opacity: .6; }
+#tag.tl { top: 22px; left: 22px; bottom: auto; right: auto; }
+#tag.tr { top: 22px; right: 22px; bottom: auto; left: auto; }
+#tag.br { bottom: 20px; right: 22px; top: auto; left: auto; }
+body.no-frame #frame, body.no-tag #tag, body.no-watermark #watermark { display: none; }
 #watermark {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   display: flex; align-items: center; justify-content: center;
@@ -64,7 +72,7 @@ body {
   font-family: var(--font-display); font-weight: 750;
   font-size: clamp(120px, 24vw, 340px);
   letter-spacing: -.04em;
-  color: var(--accent); opacity: .05;
+  color: var(--accent); opacity: var(--wm-opacity);
   transform: rotate(-8deg);
   transition: color .45s ease;
   user-select: none;
@@ -194,11 +202,107 @@ pre .a { color: var(--accent); transition: color .45s ease; }
 .two-col .copy p { color: var(--ink-dim); font-size: 16px; margin-bottom: 14px; }
 .two-col .copy p strong { color: var(--ink); font-weight: 600; }
 
-.shot { margin-top: 44px; text-align: center; }
-.shot img {
-  max-width: min(520px, 100%); border-radius: 14px;
-  border: 1px solid #23282e; box-shadow: 0 40px 100px rgba(0,0,0,.5);
+/* ---------- live settings window ---------- */
+.mac-window {
+  max-width: 560px; margin: 44px auto 0;
+  background: #212528; border: 1px solid #35393d; border-radius: 12px;
+  box-shadow: 0 40px 100px rgba(0,0,0,.55);
+  font-size: 13px; overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-weight: 400;
 }
+.mac-window .titlebar {
+  position: relative; height: 40px; display: flex; align-items: center; justify-content: center;
+  background: #2a2e31; border-bottom: 1px solid #1a1d1f;
+  font-weight: 600; font-size: 13px; color: #dfe1e2;
+}
+.mac-window .dots { position: absolute; left: 12px; display: flex; gap: 8px; }
+.mac-window .dots i { width: 12px; height: 12px; border-radius: 50%; }
+.mac-window .dots i:nth-child(1) { background: #ff5f57; }
+.mac-window .dots i:nth-child(2) { background: #febc2e; }
+.mac-window .dots i:nth-child(3) { background: #28c840; }
+.mac-window .toolbar {
+  display: flex; justify-content: center; gap: 6px;
+  background: #2a2e31; padding: 2px 8px 8px; border-bottom: 1px solid #1a1d1f;
+}
+.mac-window .tab {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: transparent; border: 0; border-radius: 8px; cursor: pointer;
+  padding: 6px 12px; font-size: 11px; color: #b6b9bb;
+  font-family: inherit;
+}
+.mac-window .tab svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.mac-window .tab.active { background: #3a3f43; color: #4da3ff; }
+.mac-window .pane { display: none; padding: 18px; }
+.mac-window .pane.active { display: block; }
+.sgroup {
+  background: #292d30; border: 1px solid #3a3e42; border-radius: 10px;
+  margin-bottom: 14px; overflow: hidden;
+}
+.sgroup .srow {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 10px 14px; min-height: 24px;
+}
+.sgroup .srow + .srow { border-top: 1px solid #3a3e42; }
+.srow label:first-child, .srow > span:first-child { color: #e8eaeb; white-space: nowrap; }
+.srow .ctl { display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; flex-wrap: wrap; row-gap: 6px; }
+.srow input[type="range"] { flex: 1; max-width: 190px; accent-color: var(--accent); }
+.srow input[type="text"] {
+  background: #1e2124; color: #e8eaeb; border: 1px solid #3a3e42; border-radius: 6px;
+  padding: 4px 8px; width: 130px; font-family: inherit; font-size: 13px; text-align: right;
+}
+.srow input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+.srow .val { color: #9a9da0; font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+.scaption { padding: 0 14px 12px; color: #9a9da0; font-size: 11px; }
+.mini-swatch {
+  width: 20px; height: 20px; border-radius: 50%; border: 0; cursor: pointer;
+  outline: 2px solid transparent; outline-offset: 2px;
+}
+.mini-swatch[aria-pressed="true"] { outline-color: #e8eaeb; }
+.corner-tile {
+  width: 24px; height: 24px; background: transparent; cursor: pointer;
+  border: 2px solid #55595d; border-radius: 3px;
+}
+.corner-tile.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.corner-tile.tl { border-top-left-radius: 10px; }
+.corner-tile.tr { border-top-right-radius: 10px; }
+.corner-tile.bl { border-bottom-left-radius: 10px; }
+.corner-tile.br { border-bottom-right-radius: 10px; }
+.seg { display: flex; background: #1e2124; border: 1px solid #3a3e42; border-radius: 7px; overflow: hidden; }
+.seg button {
+  background: transparent; border: 0; color: #b6b9bb; cursor: pointer;
+  padding: 4px 10px; font-size: 12px; font-family: inherit;
+}
+.seg button + button { border-left: 1px solid #3a3e42; }
+.seg button.on { background: #3a3f43; color: #fff; }
+.mini-screen {
+  position: relative; height: 150px; margin: 0 0 14px; background: #0b0d0e;
+  border: 1px solid #3a3e42; border-radius: 8px; overflow: hidden;
+}
+.mini-screen .mini-frame {
+  position: absolute; inset: 6px; pointer-events: none;
+  border: calc(max(var(--frame-w) * .55, 2px)) solid var(--accent);
+  border-radius: calc(var(--r-tl) * .5) calc(var(--r-tr) * .5) calc(var(--r-br) * .5) calc(var(--r-bl) * .5);
+  opacity: var(--frame-opacity);
+}
+.mini-screen .mini-tag {
+  position: absolute; left: 14px; bottom: 12px;
+  background: var(--accent); color: #fff; font-size: 11px;
+  padding: 2px 9px; border-radius: 999px;
+}
+.mini-screen .mini-tag.tl { top: 12px; left: 14px; bottom: auto; right: auto; }
+.mini-screen .mini-tag.tr { top: 12px; right: 14px; bottom: auto; left: auto; }
+.mini-screen .mini-tag.br { bottom: 12px; right: 14px; top: auto; left: auto; }
+.about-pane { text-align: center; padding: 8px 0 4px; }
+.about-pane img { width: 72px; height: 72px; }
+.about-pane h4 { font-size: 15px; margin: 8px 0 2px; color: #e8eaeb; }
+.about-pane p { color: #9a9da0; font-size: 12px; margin-bottom: 10px; }
+.about-pane a { color: #4da3ff; text-decoration: none; font-size: 12px; }
+.btn-small {
+  background: #3a3f43; color: #e8eaeb; border: 1px solid #4a4e52; border-radius: 6px;
+  padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.btn-small:hover { background: #45494d; }
 
 footer {
   padding: 60px 0 90px; border-top: 1px solid #1a1f24; margin-top: 40px;
@@ -252,7 +356,82 @@ footer a:hover { color: var(--ink); }
       <div class="card"><h3><span class="n">05</span>Menu bar plate</h3><p>A colored mini-nameplate in the menu bar. Its menu is a glanceable dashboard: uptime, IP (click to copy), CPU, RAM, free disk.</p></div>
       <div class="card"><h3><span class="n">06</span>Attention alerts</h3><p>A bundled CLI summons a topmost message card with pulsating borders when an agent or script needs the human at the keyboard.</p></div>
     </div>
-    <div class="shot"><img src="settings.png" alt="Nameplate settings window with live preview" width="460" loading="lazy"></div>
+  </section>
+
+  <section id="settings">
+    <div class="kicker">The settings</div>
+    <h2>Don't screenshot it. Click it.</h2>
+    <p style="color: var(--ink-dim); max-width: 54ch; font-size: 16px;">A faithful remake of the real Settings window — and it's live. Everything you change here restyles the nameplate this page is wearing.</p>
+    <div class="mac-window" id="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span>Identity</div>
+      <div class="toolbar">
+        <button class="tab active" data-pane="identity"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="11" r="2.2"/><path d="M5.5 17c.8-2 2-3 3.5-3s2.7 1 3.5 3M14 9h4M14 13h4"/></svg>Identity</button>
+        <button class="tab" data-pane="layers"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>Layers</button>
+        <button class="tab" data-pane="splash"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Splash</button>
+        <button class="tab" data-pane="general"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/></svg>General</button>
+        <button class="tab" data-pane="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".4"/></svg>About</button>
+      </div>
+
+      <div class="pane active" id="pane-identity">
+        <div class="mini-screen"><div class="mini-frame"></div><div class="mini-tag" id="miniTag">megaclaw</div></div>
+        <div class="sgroup">
+          <div class="srow"><label for="setName">Name</label><span class="ctl"><input type="text" id="setName" placeholder="megaclaw"></span></div>
+          <div class="srow"><label for="setGlyph">Glyph</label><span class="ctl"><input type="text" id="setGlyph" placeholder="Optional, e.g. 🦞" maxlength="4"></span></div>
+          <div class="srow"><span>Color</span><span class="ctl" id="setSwatches"></span></div>
+        </div>
+        <div class="scaption">How this Mac announces itself. Leave the name empty to use the computer name.</div>
+      </div>
+
+      <div class="pane" id="pane-layers">
+        <div class="sgroup">
+          <div class="srow"><label for="setFrameW">Frame thickness</label><span class="ctl"><input type="range" id="setFrameW" min="2" max="14" value="5"><span class="val" id="valFrameW">5 pt</span></span></div>
+          <div class="srow"><label for="setFrameO">Frame opacity</label><span class="ctl"><input type="range" id="setFrameO" min="20" max="100" value="100"><span class="val" id="valFrameO">100%</span></span></div>
+          <div class="srow"><label for="setRadius">Corner radius</label><span class="ctl"><input type="range" id="setRadius" min="0" max="44" value="22"><span class="val" id="valRadius">22</span></span></div>
+          <div class="srow"><span>Rounded corners</span><span class="ctl">
+            <button class="corner-tile tl" data-c="tl" title="Top left"></button>
+            <button class="corner-tile tr" data-c="tr" title="Top right"></button>
+            <button class="corner-tile bl on" data-c="bl" title="Bottom left"></button>
+            <button class="corner-tile br on" data-c="br" title="Bottom right"></button>
+          </span></div>
+        </div>
+        <div class="sgroup">
+          <div class="srow"><span>Name tag corner</span><span class="ctl"><span class="seg" id="setTagCorner">
+            <button data-c="tl">↖︎</button><button data-c="tr">↗︎</button><button data-c="bl" class="on">↙︎</button><button data-c="br">↘︎</button>
+          </span></span></div>
+          <div class="srow"><label for="setWmO">Watermark opacity</label><span class="ctl"><input type="range" id="setWmO" min="0" max="18" value="5"><span class="val" id="valWmO">5%</span></span></div>
+        </div>
+        <div class="scaption">Default rounds only the bottom corners — the menu bar owns the top. Yes, the corner tiles take clicks anywhere now, not just on the border.</div>
+      </div>
+
+      <div class="pane" id="pane-splash">
+        <div class="sgroup">
+          <div class="srow"><label for="setSplashD">Duration</label><span class="ctl"><input type="range" id="setSplashD" min="8" max="50" value="24"><span class="val" id="valSplashD">2.4 s</span></span></div>
+          <div class="srow"><span>Play now</span><span class="ctl"><button class="btn-small" id="setSplashPlay">Replay splash</button></span></div>
+        </div>
+        <div class="sgroup">
+          <div class="srow"><label for="trigWake">Display wake</label><span class="ctl"><input type="checkbox" id="trigWake" checked></span></div>
+          <div class="srow"><label for="trigUnlock">Screen unlock</label><span class="ctl"><input type="checkbox" id="trigUnlock" checked></span></div>
+          <div class="srow"><label for="trigReconf">Display reconfiguration</label><span class="ctl"><input type="checkbox" id="trigReconf" checked></span></div>
+        </div>
+        <div class="scaption">macOS has no public "remote session connected" event, so Nameplate reacts to the events that accompany one. On this page, the triggers are just for show — the button is real.</div>
+      </div>
+
+      <div class="pane" id="pane-general">
+        <div class="sgroup">
+          <div class="srow"><label for="layFrame">Frame</label><span class="ctl"><input type="checkbox" id="layFrame" data-layer="frame" checked></span></div>
+          <div class="srow"><label for="layTag">Name tag</label><span class="ctl"><input type="checkbox" id="layTag" data-layer="tag" checked></span></div>
+          <div class="srow"><label for="layWm">Watermark</label><span class="ctl"><input type="checkbox" id="layWm" data-layer="watermark" checked></span></div>
+        </div>
+        <div class="scaption">In the app: show decorations always, or only when viewed remotely. Here: toggle the layers this page wears.</div>
+      </div>
+
+      <div class="pane about-pane" id="pane-about">
+        <img src="icon.png" alt="Nameplate app icon">
+        <h4>Nameplate</h4>
+        <p>Version 0.1.1 · MIT · © 2026 Peter Steinberger</p>
+        <a href="https://github.com/steipete/Nameplate/releases/latest">Download</a> · <a href="https://github.com/steipete/Nameplate">GitHub</a>
+      </div>
+    </div>
   </section>
 
   <section id="fleet">
@@ -322,33 +501,113 @@ const PALETTE = [
   ["Violet", "#7F77DD"], ["Magenta", "#D4537E"],
 ];
 const root = document.documentElement;
-const swatches = document.getElementById("swatches");
-PALETTE.forEach(([name, hex]) => {
-  const b = document.createElement("button");
-  b.className = "swatch"; b.style.background = hex; b.title = name;
-  b.setAttribute("aria-label", name);
-  b.setAttribute("aria-pressed", hex === "#1D9E75");
-  b.addEventListener("click", () => {
-    root.style.setProperty("--accent", hex);
-    document.querySelectorAll(".swatch").forEach(s => s.setAttribute("aria-pressed", s === b));
-  });
-  swatches.appendChild(b);
-});
-
-const tag = document.getElementById("tag");
-const splash = document.getElementById("splash");
+const $ = id => document.getElementById(id);
+const tag = $("tag"), splash = $("splash"), miniTag = $("miniTag");
 const splashCard = splash.querySelector(".card");
 const watermark = document.querySelector("#watermark span");
-const currentName = () => (tag.textContent.trim() || "megaclaw");
-tag.addEventListener("input", () => { watermark.textContent = currentName(); });
+
+function setAccent(hex) {
+  root.style.setProperty("--accent", hex);
+  document.querySelectorAll(".swatch, .mini-swatch").forEach(s =>
+    s.setAttribute("aria-pressed", String(s.dataset.hex === hex)));
+}
+function makeSwatches(container, cls) {
+  PALETTE.forEach(([name, hex]) => {
+    const b = document.createElement("button");
+    b.className = cls; b.style.background = hex; b.title = name; b.dataset.hex = hex;
+    b.setAttribute("aria-label", name);
+    b.setAttribute("aria-pressed", String(hex === "#1D9E75"));
+    b.addEventListener("click", () => setAccent(hex));
+    container.appendChild(b);
+  });
+}
+makeSwatches($("swatches"), "swatch");
+makeSwatches($("setSwatches"), "mini-swatch");
+
+// identity: name + glyph, synced between the corner pill and the settings field
+const currentName = () => ($("setName").value.trim() || tag.textContent.trim() || "megaclaw");
+function renderIdentity() {
+  const name = $("setName").value.trim() || "megaclaw";
+  const glyph = $("setGlyph").value.trim();
+  const label = glyph ? glyph + " " + name : name;
+  tag.textContent = label;
+  miniTag.textContent = label;
+  watermark.textContent = name;
+}
+$("setName").addEventListener("input", renderIdentity);
+$("setGlyph").addEventListener("input", renderIdentity);
+tag.addEventListener("input", () => {
+  const text = tag.textContent.trim();
+  $("setName").value = text;
+  $("setGlyph").value = "";
+  watermark.textContent = text || "megaclaw";
+  miniTag.textContent = text || "megaclaw";
+});
 tag.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); tag.blur(); } });
 
-document.getElementById("replay").addEventListener("click", () => {
+// splash
+let splashSecs = 2.4;
+function playSplash() {
   splashCard.textContent = currentName().toUpperCase();
+  splash.style.animationDuration = splashSecs + "s";
   splash.classList.remove("on");
   void splash.offsetWidth; // restart animation
   splash.classList.add("on");
+}
+$("replay").addEventListener("click", playSplash);
+$("setSplashPlay").addEventListener("click", playSplash);
+$("setSplashD").addEventListener("input", e => {
+  splashSecs = e.target.value / 10;
+  $("valSplashD").textContent = splashSecs.toFixed(1) + " s";
 });
+
+// settings window tabs
+const win = $("win");
+const titlebar = win.querySelector(".titlebar");
+win.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  win.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
+  win.querySelectorAll(".pane").forEach(p => p.classList.toggle("active", p.id === "pane-" + t.dataset.pane));
+  titlebar.lastChild.textContent = t.textContent;
+}));
+
+// layers: frame sliders + per-corner rounding
+const corners = { tl: false, tr: false, bl: true, br: true };
+function applyCorners() {
+  const r = $("setRadius").value + "px";
+  for (const c of ["tl", "tr", "bl", "br"]) root.style.setProperty("--r-" + c, corners[c] ? r : "0px");
+  $("valRadius").textContent = $("setRadius").value;
+}
+$("setRadius").addEventListener("input", applyCorners);
+win.querySelectorAll(".corner-tile").forEach(b => b.addEventListener("click", () => {
+  corners[b.dataset.c] = !corners[b.dataset.c];
+  b.classList.toggle("on", corners[b.dataset.c]);
+  applyCorners();
+}));
+$("setFrameW").addEventListener("input", e => {
+  root.style.setProperty("--frame-w", e.target.value + "px");
+  $("valFrameW").textContent = e.target.value + " pt";
+});
+$("setFrameO").addEventListener("input", e => {
+  root.style.setProperty("--frame-opacity", e.target.value / 100);
+  $("valFrameO").textContent = e.target.value + "%";
+});
+$("setWmO").addEventListener("input", e => {
+  root.style.setProperty("--wm-opacity", e.target.value / 100);
+  $("valWmO").textContent = e.target.value + "%";
+});
+
+// name tag corner
+$("setTagCorner").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  $("setTagCorner").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+  tag.classList.remove("tl", "tr", "bl", "br");
+  miniTag.classList.remove("tl", "tr", "bl", "br");
+  if (b.dataset.c !== "bl") { tag.classList.add(b.dataset.c); miniTag.classList.add(b.dataset.c); }
+}));
+
+// general: layer visibility
+win.querySelectorAll("input[data-layer]").forEach(t => t.addEventListener("change", () => {
+  document.body.classList.toggle("no-" + t.dataset.layer, !t.checked);
+}));
 </script>
 </body>
 </html>
