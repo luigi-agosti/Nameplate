@@ -1,0 +1,17 @@
+# General
+.DS_Store
+*.swp
+*.log
+
+# Build outputs
+/.build
+/Packages
+DerivedData/
+Nameplate.app
+
+# Xcode workspace/user data
+xcuserdata/
+.swiftpm/
+
+# Debug symbols
+*.dSYM
