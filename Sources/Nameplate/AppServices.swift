@@ -33,14 +33,15 @@ final class AppServices {
         self.settingsWindow?.show(tab: tab)
     }
 
-    /// In remote-only mode, decoration exists when a virtual display is
-    /// present or someone is screen-shared in. Attention alerts ignore this.
-    private var decorationVisibleAnywhere: Bool {
+    /// Same per-screen rule the overlay uses: in remote-only mode a screen is
+    /// decorated when it is virtual or someone is screen-shared in.
+    /// Attention alerts ignore this.
+    private func decorationAllowed(on screen: NSScreen) -> Bool {
         switch self.settings.visibilityMode {
         case .always:
             true
         case .remoteOnly:
-            RemoteViewMonitor.anyVirtualScreen() || self.remoteMonitor.screenSharingActive
+            RemoteViewMonitor.isVirtual(screen: screen) || self.remoteMonitor.screenSharingActive
         }
     }
 
@@ -68,6 +69,10 @@ final class AppServices {
                 }
             }
 
+        self.splash?.screenFilter = { [weak self] screen in
+            self?.decorationAllowed(on: screen) ?? true
+        }
+
         monitor.onTrigger = { [weak self, weak settings] trigger in
             guard let self, let settings else { return }
             let wanted = switch trigger {
@@ -75,7 +80,7 @@ final class AppServices {
             case .unlock: settings.splashOnUnlock
             case .displayChange: settings.splashOnDisplayChange
             }
-            if wanted, self.decorationVisibleAnywhere {
+            if wanted {
                 self.splash?.show()
             }
         }

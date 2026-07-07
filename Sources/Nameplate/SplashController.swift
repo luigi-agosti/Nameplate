@@ -11,6 +11,10 @@ final class SplashController {
     private var lastShownAt: ContinuousClock.Instant?
     private var generation = 0
 
+    /// Per-screen gate for automatic splashes (decoration visibility mode).
+    /// Forced splashes (explicit user/CLI action) ignore it.
+    var screenFilter: (@MainActor (NSScreen) -> Bool)?
+
     /// Collapses trigger storms (wake + unlock + display change often fire together).
     private static let debounceInterval: Duration = .seconds(8)
 
@@ -26,6 +30,10 @@ final class SplashController {
                 return
             }
         }
+        let screens = force
+            ? NSScreen.screens
+            : NSScreen.screens.filter { self.screenFilter?($0) ?? true }
+        guard !screens.isEmpty else { return }
         self.lastShownAt = ContinuousClock.now
 
         self.dismissImmediately()
@@ -35,7 +43,7 @@ final class SplashController {
         let identity = self.settings.identity
         let holdDuration = self.settings.splashDuration
 
-        self.panels = NSScreen.screens.map { screen in
+        self.panels = screens.map { screen in
             let panel = OverlayPanelFactory.makePanel(
                 for: screen,
                 level: NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1))
