@@ -7,6 +7,11 @@ APP_BUNDLE="Nameplate.app"
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
 source "$ROOT/version.env"
+
+# notarytool and stapler require full Xcode, not CommandLineTools.
+if [[ "$(xcode-select -p)" == *CommandLineTools* && -d /Applications/Xcode.app ]]; then
+  export DEVELOPER_DIR=/Applications/Xcode.app
+fi
 ZIP_NAME="Nameplate-${MARKETING_VERSION}.zip"
 
 # mac-release exports the 1Password field labels verbatim; accept both shapes.
