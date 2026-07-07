@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1200px; height: 630px; overflow: hidden;
+  background: #0c0e10; color: #e8e4dc;
+  font-family: "Bricolage Grotesque", sans-serif;
+  position: relative;
+}
+.frame {
+  position: absolute; inset: 14px;
+  border: 10px solid #1D9E75;
+  border-radius: 0 0 40px 40px;
+}
+.wm {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.wm span {
+  font-weight: 750; font-size: 330px; letter-spacing: -.04em;
+  color: #1D9E75; opacity: .07; transform: rotate(-8deg); white-space: nowrap;
+}
+.content {
+  position: absolute; left: 84px; top: 118px; right: 84px;
+}
+.brand {
+  display: flex; align-items: center; gap: 18px;
+  font-family: "Fragment Mono", monospace; font-size: 30px; color: #e8e4dc;
+}
+.brand .dot { width: 52px; height: 34px; border: 6px solid #1D9E75; border-radius: 0 0 12px 12px; }
+h1 {
+  margin-top: 44px;
+  font-size: 88px; font-weight: 720; line-height: 1.02; letter-spacing: -.035em;
+}
+h1 em { font-style: normal; color: #1D9E75; }
+.sub {
+  margin-top: 30px; font-size: 30px; color: #8f918f; font-weight: 380;
+}
+.pill {
+  position: absolute; left: 60px; bottom: 58px;
+  background: #1D9E75; color: #fff;
+  font-family: "Fragment Mono", monospace; font-size: 26px;
+  padding: 12px 30px; border-radius: 999px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.5);
+}
+.domain {
+  position: absolute; right: 64px; bottom: 66px;
+  font-family: "Fragment Mono", monospace; font-size: 24px; color: #8f918f;
+}
+</style>
+</head>
+<body>
+  <div class="wm"><span>megaclaw</span></div>
+  <div class="frame"></div>
+  <div class="content">
+    <div class="brand"><span class="dot"></span>nameplate</div>
+    <h1>Never wonder <em>which Mac</em><br>you just remoted into.</h1>
+    <div class="sub">Click-through identity overlays for every Mac in your fleet.</div>
+  </div>
+  <div class="pill">🦞 megaclaw</div>
+  <div class="domain">nameplate.sh</div>
+</body>
+</html>

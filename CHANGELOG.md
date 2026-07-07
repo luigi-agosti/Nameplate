@@ -1,11 +1,10 @@
 # Changelog
 
-## 0.1.2 - Unreleased
+## 0.2.0 - 2026-07-07
 
 - `nameplate://config` URL: opens a floating confirmation panel summarizing the proposed identity/layer settings with Cancel/Apply — the website's live settings window sends its state here via "Apply on this Mac".
 - Homebrew cask: `brew install --cask steipete/tap/nameplate` (installs the app and links the `nameplate` CLI).
-
-- Website: the settings screenshot is now a live interactive remake of the Settings window — tabs work, and Identity/Layers/Splash/General controls restyle the nameplate the page itself wears.
+- Website: the settings screenshot is now a live interactive remake of the Settings window — tabs work, and Identity/Layers/Splash/General controls restyle the nameplate the page itself wears; "Apply on this Mac" hands the config to the app, and the site ships a social card.
 
 ## 0.1.1 - 2026-07-07
 
