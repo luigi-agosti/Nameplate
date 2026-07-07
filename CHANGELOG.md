@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.2.2 - Unreleased
+
 ## 0.2.1 - 2026-07-07
 
 - Windows port in `windows/` (C#/.NET 8 WPF): click-through frame/tag/watermark/splash overlays per monitor, real remote-connect splash via WTS session events, tray dashboard, named-pipe CLI (`nameplate attention|splash`), fleet.json compatibility, and hostname-color parity with macOS. Verified on Windows 11 (21 core tests + on-VM overlay/attention proof).
