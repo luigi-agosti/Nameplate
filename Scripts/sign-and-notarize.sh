@@ -50,4 +50,35 @@ stapler validate "$APP_BUNDLE"
 # Stable-name copy so releases/latest/download/Nameplate.zip always works.
 cp "$ZIP_NAME" "Nameplate.zip"
 
-echo "Done: $ZIP_NAME"
+DMG_NAME="Nameplate-${MARKETING_VERSION}.dmg"
+echo "Building $DMG_NAME"
+DMG_STAGE=$(mktemp -d /tmp/nameplate-dmg.XXXXXX)
+trap 'rm -f "$KEY_FILE" "$NOTARIZE_ZIP"; rm -rf "$DMG_STAGE"' EXIT
+"$DITTO_BIN" "$APP_BUNDLE" "$DMG_STAGE/$APP_BUNDLE"
+rm -f "$DMG_NAME"
+create-dmg \
+  --volname "$APP_NAME" \
+  --volicon "Icon.icns" \
+  --background "assets/dmg-background.tiff" \
+  --window-size 660 400 \
+  --icon-size 128 \
+  --icon "$APP_BUNDLE" 165 190 \
+  --app-drop-link 495 190 \
+  --hide-extension "$APP_BUNDLE" \
+  --no-internet-enable \
+  --codesign "$APP_IDENTITY" \
+  "$DMG_NAME" "$DMG_STAGE"
+
+echo "Notarizing $DMG_NAME"
+xcrun notarytool submit "$DMG_NAME" \
+  --key "$KEY_FILE" \
+  --key-id "$APP_STORE_CONNECT_KEY_ID" \
+  --issuer "$APP_STORE_CONNECT_ISSUER_ID" \
+  --wait
+xcrun stapler staple "$DMG_NAME"
+spctl -a -t open --context context:primary-signature -vv "$DMG_NAME"
+
+# Stable-name copy so releases/latest/download/Nameplate.dmg always works.
+cp "$DMG_NAME" "Nameplate.dmg"
+
+echo "Done: $ZIP_NAME + $DMG_NAME"

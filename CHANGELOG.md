@@ -2,6 +2,8 @@
 
 ## 0.2.1 - Unreleased
 
+- Releases now ship a notarized DMG with a branded drag-to-install background, plus stable `Nameplate.dmg` / `Nameplate.zip` download URLs via `releases/latest`; website and README link the DMG.
+
 ## 0.2.0 - 2026-07-07
 
 - `nameplate://config` URL: opens a floating confirmation panel summarizing the proposed identity/layer settings with Cancel/Apply — the website's live settings window sends its state here via "Apply on this Mac".

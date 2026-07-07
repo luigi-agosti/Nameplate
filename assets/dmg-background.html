@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+/* Rendered at 1320x800 (2x), Finder window is 660x400. Icon slots: app at
+   (165,190), Applications at (495,190) in 1x coordinates — keep those clear. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1320px; height: 800px; overflow: hidden; position: relative;
+  background: #0c0e10;
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+.frame {
+  position: absolute; inset: 16px;
+  border: 10px solid #1D9E75;
+  border-radius: 0 0 44px 44px;
+}
+.wm {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.wm span {
+  font-weight: 750; font-size: 300px; letter-spacing: -.04em;
+  color: #1D9E75; opacity: .06; transform: rotate(-8deg); white-space: nowrap;
+}
+.brand {
+  position: absolute; top: 74px; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  font-family: "Fragment Mono", monospace; font-size: 30px; color: #e8e4dc;
+}
+.brand .dot { width: 48px; height: 32px; border: 6px solid #1D9E75; border-radius: 0 0 11px 11px; }
+.tagline {
+  position: absolute; top: 136px; left: 0; right: 0; text-align: center;
+  font-size: 24px; color: #8f918f; font-weight: 380;
+}
+.arrow {
+  position: absolute; top: 368px; left: 560px; width: 200px; text-align: center;
+  color: #1D9E75; font-size: 76px; font-weight: 700;
+}
+.pill {
+  position: absolute; bottom: 64px; left: 0; right: 0;
+  display: flex; justify-content: center;
+}
+.pill span {
+  background: #1D9E75; color: #fff;
+  font-family: "Fragment Mono", monospace; font-size: 22px;
+  padding: 9px 26px; border-radius: 999px;
+}
+</style>
+</head>
+<body>
+  <div class="wm"><span>megaclaw</span></div>
+  <div class="frame"></div>
+  <div class="brand"><span class="dot"></span>nameplate</div>
+  <div class="tagline">Brand every Mac in your fleet.</div>
+  <div class="arrow">→</div>
+  <div class="pill"><span>drag to install</span></div>
+</body>
+</html>

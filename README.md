@@ -19,7 +19,13 @@ Each Mac gets a stable default color derived from its hostname, so even an uncon
 
 ## Install
 
-Build from source (requires Xcode 26 / Swift 6.2+):
+Download the [DMG](https://github.com/steipete/Nameplate/releases/latest/download/Nameplate.dmg) (drag to install), or:
+
+```sh
+brew install --cask steipete/tap/nameplate
+```
+
+Or build from source (requires Xcode 26 / Swift 6.2+):
 
 ```sh
 git clone https://github.com/steipete/Nameplate.git
