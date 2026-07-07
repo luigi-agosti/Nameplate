@@ -303,6 +303,12 @@ pre .a { color: var(--accent); transition: color .45s ease; }
   padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit;
 }
 .btn-small:hover { background: #45494d; }
+.winfooter {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 16px; background: #2a2e31; border-top: 1px solid #1a1d1f;
+  color: #9a9da0; font-size: 12px;
+}
+.winfooter .apply { background: var(--accent); border-color: transparent; color: #fff; font-weight: 600; }
 
 footer {
   padding: 60px 0 90px; border-top: 1px solid #1a1f24; margin-top: 40px;
@@ -336,25 +342,12 @@ footer a:hover { color: var(--ink); }
     <h1>Never wonder <em>which Mac</em> you just remoted into.</h1>
     <p class="sub">Nameplate brands every Mac in your fleet with an unmistakable identity — a colored frame, a name tag, a watermark, a connect splash. All click-through overlays. Your wallpaper stays untouched, and fullscreen apps can't hide it.</p>
     <div class="cta">
-      <a class="btn primary" href="https://github.com/steipete/nameplate">Get Nameplate</a>
+      <a class="btn primary" href="https://github.com/steipete/Nameplate/releases/latest">Download for Mac</a>
       <button class="btn ghost" id="replay">Replay connect splash</button>
     </div>
     <div class="palette">
       <div class="label">This page is wearing one. Pick a livery — and the pill in the corner takes your Mac's name.</div>
       <div class="swatches" id="swatches"></div>
-    </div>
-  </section>
-
-  <section id="layers">
-    <div class="kicker">The layers</div>
-    <h2>An aircraft livery for your Mac.</h2>
-    <div class="grid">
-      <div class="card"><h3><span class="n">01</span>Frame</h3><p>A colored border around every display, rounded corners following the screen's curve. Always visible, costs zero pixels of workspace, survives fullscreen apps.</p></div>
-      <div class="card"><h3><span class="n">02</span>Name tag</h3><p>A small pill with the Mac's name and an optional emoji glyph, pinned to a corner. Like the one at the bottom of this page.</p></div>
-      <div class="card"><h3><span class="n">03</span>Watermark</h3><p>A big translucent name across the screen, readable from across the room. It's behind this text right now.</p></div>
-      <div class="card"><h3><span class="n">04</span>Connect splash</h3><p>The Mac's name flashes center-screen when a remote session likely just started, then fades out. No more typing <code>hostname</code> to be sure.</p></div>
-      <div class="card"><h3><span class="n">05</span>Menu bar plate</h3><p>A colored mini-nameplate in the menu bar. Its menu is a glanceable dashboard: uptime, IP (click to copy), CPU, RAM, free disk.</p></div>
-      <div class="card"><h3><span class="n">06</span>Attention alerts</h3><p>A bundled CLI summons a topmost message card with pulsating borders when an agent or script needs the human at the keyboard.</p></div>
     </div>
   </section>
 
@@ -431,6 +424,23 @@ footer a:hover { color: var(--ink); }
         <p>Version 0.1.1 · MIT · © 2026 Peter Steinberger</p>
         <a href="https://github.com/steipete/Nameplate/releases/latest">Download</a> · <a href="https://github.com/steipete/Nameplate">GitHub</a>
       </div>
+      <div class="winfooter">
+        <span>Happy with it? Send it to the app.</span>
+        <button class="btn-small apply" id="applyOnMac" title="Opens Nameplate and asks to apply this configuration">Apply on this Mac</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="layers">
+    <div class="kicker">The layers</div>
+    <h2>An aircraft livery for your Mac.</h2>
+    <div class="grid">
+      <div class="card"><h3><span class="n">01</span>Frame</h3><p>A colored border around every display, rounded corners following the screen's curve. Always visible, costs zero pixels of workspace, survives fullscreen apps.</p></div>
+      <div class="card"><h3><span class="n">02</span>Name tag</h3><p>A small pill with the Mac's name and an optional emoji glyph, pinned to a corner. Like the one at the bottom of this page.</p></div>
+      <div class="card"><h3><span class="n">03</span>Watermark</h3><p>A big translucent name across the screen, readable from across the room. It's behind this text right now.</p></div>
+      <div class="card"><h3><span class="n">04</span>Connect splash</h3><p>The Mac's name flashes center-screen when a remote session likely just started, then fades out. No more typing <code>hostname</code> to be sure.</p></div>
+      <div class="card"><h3><span class="n">05</span>Menu bar plate</h3><p>A colored mini-nameplate in the menu bar. Its menu is a glanceable dashboard: uptime, IP (click to copy), CPU, RAM, free disk.</p></div>
+      <div class="card"><h3><span class="n">06</span>Attention alerts</h3><p>A bundled CLI summons a topmost message card with pulsating borders when an agent or script needs the human at the keyboard.</p></div>
     </div>
   </section>
 
@@ -475,15 +485,18 @@ notifyutil -p com.steipete.nameplate.splash</pre>
 
   <section id="install">
     <div class="kicker">Install</div>
-    <h2>Build from source. Two commands.</h2>
+    <h2>One brew away.</h2>
     <div class="two-col">
       <div class="copy">
         <p>Requires <strong>Xcode 26 / Swift 6.2+</strong>. Release builds auto-update via Sparkle.</p>
         <p>MIT licensed. No accounts, no telemetry, no network calls except the update check.</p>
       </div>
-      <pre>git clone https://github.com/steipete/nameplate.git
-cd nameplate && ./Scripts/package_app.sh release
-open Nameplate.app</pre>
+      <pre><span class="c"># Homebrew</span>
+brew install --cask steipete/tap/nameplate
+
+<span class="c"># or from source (Xcode 26 / Swift 6.2+)</span>
+git clone https://github.com/steipete/Nameplate.git
+cd Nameplate && ./Scripts/package_app.sh release</pre>
     </div>
   </section>
 
@@ -603,6 +616,32 @@ $("setTagCorner").querySelectorAll("button").forEach(b => b.addEventListener("cl
   miniTag.classList.remove("tl", "tr", "bl", "br");
   if (b.dataset.c !== "bl") { tag.classList.add(b.dataset.c); miniTag.classList.add(b.dataset.c); }
 }));
+
+// apply on this mac: hand the current config to the app via nameplate://config
+function buildConfigURL() {
+  const p = new URLSearchParams();
+  const name = $("setName").value.trim() || tag.textContent.trim();
+  if (name) p.set("name", name);
+  const glyph = $("setGlyph").value.trim();
+  if (glyph) p.set("glyph", glyph);
+  p.set("color", getComputedStyle(root).getPropertyValue("--accent").trim());
+  p.set("frameThickness", $("setFrameW").value);
+  p.set("frameOpacity", String($("setFrameO").value / 100));
+  p.set("cornerRadius", $("setRadius").value);
+  p.set("roundTopLeft", corners.tl ? 1 : 0);
+  p.set("roundTopRight", corners.tr ? 1 : 0);
+  p.set("roundBottomLeft", corners.bl ? 1 : 0);
+  p.set("roundBottomRight", corners.br ? 1 : 0);
+  const tc = document.querySelector("#setTagCorner button.on").dataset.c;
+  p.set("tagCorner", { tl: "topLeft", tr: "topRight", bl: "bottomLeft", br: "bottomRight" }[tc]);
+  p.set("watermarkOpacity", String($("setWmO").value / 100));
+  p.set("frameEnabled", $("layFrame").checked ? 1 : 0);
+  p.set("tagEnabled", $("layTag").checked ? 1 : 0);
+  p.set("watermarkEnabled", $("layWm").checked ? 1 : 0);
+  p.set("splashDuration", String(splashSecs));
+  return "nameplate://config?" + p.toString();
+}
+$("applyOnMac").addEventListener("click", () => { location.href = buildConfigURL(); });
 
 // general: layer visibility
 win.querySelectorAll("input[data-layer]").forEach(t => t.addEventListener("change", () => {
