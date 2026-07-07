@@ -58,6 +58,8 @@ private struct CornerToggleButton: View {
                     }
                 }
                 .frame(width: 22, height: 22)
+                // Stroke-only shapes hit-test just the drawn border; make the whole tile clickable.
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help("\(self.corner.label) rounded")
