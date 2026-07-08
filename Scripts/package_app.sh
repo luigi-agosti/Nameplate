@@ -78,9 +78,12 @@ if [[ -f "$ROOT/Icon.icns" ]]; then
 fi
 
 CODESIGN_ID="${APP_IDENTITY:-Developer ID Application: Peter Steinberger (Y5PE65HELJ)}"
-SIGN_FLAGS=(--force --options runtime)
+# Hardened runtime enables library validation, which rejects the embedded
+# Sparkle framework under ad-hoc signing (no Team ID) — only use it with a
+# real identity.
+SIGN_FLAGS=(--force)
 if [[ "$CODESIGN_ID" != "-" ]]; then
-  SIGN_FLAGS+=(--timestamp)
+  SIGN_FLAGS+=(--options runtime --timestamp)
 fi
 
 # Embed Sparkle.framework
