@@ -16,10 +16,16 @@ let package = Package(
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
+        .target(
+            name: "NameplateSpaces",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+            ]),
         .executableTarget(
             name: "Nameplate",
             dependencies: [
                 "NameplateCore",
+                "NameplateSpaces",
                 .product(name: "Sparkle", package: "Sparkle"),
             ],
             swiftSettings: [
@@ -29,6 +35,7 @@ let package = Package(
             name: "NameplateCLI",
             dependencies: [
                 "NameplateCore",
+                "NameplateSpaces",
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),

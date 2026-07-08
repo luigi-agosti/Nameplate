@@ -17,6 +17,7 @@ final class AppServices {
     private var settingsWindow: SettingsWindowController?
     private(set) var updater: UpdaterProviding?
     private let remoteMonitor = RemoteViewMonitor()
+    let spaceMonitor = SpaceMonitor()
     private var settingsCancellable: AnyCancellable?
 
     init(settings: AppSettings) {
@@ -56,10 +57,16 @@ final class AppServices {
     func start() {
         guard self.monitor == nil else { return }
         let settings = self.settings
-        self.overlay = OverlayController(settings: settings, remoteMonitor: self.remoteMonitor)
+        self.overlay = OverlayController(
+            settings: settings,
+            remoteMonitor: self.remoteMonitor,
+            spaceMonitor: self.spaceMonitor)
         self.splash = SplashController(settings: settings)
         self.attention = AttentionController(settings: settings)
-        self.statusItem = StatusItemController(settings: settings, services: self)
+        self.statusItem = StatusItemController(
+            settings: settings,
+            spaceMonitor: self.spaceMonitor,
+            services: self)
         self.updater = makeUpdaterController(settings: settings)
         let monitor = ConnectionMonitor()
         self.monitor = monitor
@@ -79,6 +86,25 @@ final class AppServices {
 
         self.splash?.screenFilter = { [weak self] screen in
             self?.decorationAllowed(on: screen) ?? true
+        }
+
+        // Overlays and the status item re-render through observation; the
+        // splash is the only push-style reaction to a Space switch.
+        self.spaceMonitor.onActiveSpaceChange = { [weak self] changedDisplays in
+            guard let self, self.settings.spacesEnabled, self.settings.splashOnSpaceChange else {
+                return
+            }
+            for displayUUID in changedDisplays {
+                guard
+                    let space = self.settings.spaceIdentity(
+                        for: self.spaceMonitor.current(onDisplay: displayUUID)),
+                    let screen = NSScreen.screens.first(where: { $0.displayUUID == displayUUID })
+                else { continue }
+                let machine = self.settings.identity
+                self.splash?.showSpace(
+                    MacIdentity(name: space.name, colorHex: machine.colorHex),
+                    on: screen)
+            }
         }
 
         monitor.onTrigger = { [weak self, weak settings] trigger in

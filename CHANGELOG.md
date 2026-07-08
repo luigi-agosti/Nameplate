@@ -2,6 +2,7 @@
 
 ## 0.2.2 - Unreleased
 
+- Spaces (macOS): name Mission Control Spaces — second name-tag segment, optional menu bar suffix + switch splash, new Settings › Spaces pane, `nameplate space list|current|set` CLI, config in dotfiles-syncable `~/.config/nameplate/workspaces.json`; name-only by design (color stays the machine signal), opt-in (private-API Space detection, degrades to machine-only if macOS breaks it).
 - Website: "Summon me" demo fires a real attention alert (card + pulsating frame) on the page; one subtle frame-pulse hint per session when the agents section scrolls into view — never uninvited.
 
 ## 0.2.1 - 2026-07-07

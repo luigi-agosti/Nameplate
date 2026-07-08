@@ -1,5 +1,6 @@
 import Combine
 import NameplateCore
+import NameplateSpaces
 import ServiceManagement
 import SwiftUI
 import SystemConfiguration
@@ -80,16 +81,31 @@ final class AppSettings: ObservableObject {
     // Fleet file (~/.config/nameplate/fleet.json), synced via dotfiles.
     @AppStorage("useFleetFile") var useFleetFile: Bool = true
 
+    // Per-Space branding. Off by default: Space identification rides on
+    // private window-server API, so it stays opt-in.
+    @AppStorage("spacesEnabled") var spacesEnabled: Bool = false
+    @AppStorage("spaceInTag") var spaceInTag: Bool = true
+    @AppStorage("spaceInMenuBar") var spaceInMenuBar: Bool = false
+    @AppStorage("splashOnSpaceChange") var splashOnSpaceChange: Bool = false
+
     @Published private(set) var fleetEntry: FleetEntry?
     @Published private(set) var fleetFileExists: Bool = false
 
-    private var fleetWatcher: FleetFileWatcher?
+    @Published private(set) var hostWorkspaces: HostWorkspaces?
+    @Published private(set) var workspaceFileExists: Bool = false
+
+    private var fleetWatcher: ConfigFileWatcher?
+    private var workspaceWatcher: ConfigFileWatcher?
 
     init() {
         LaunchAtLoginManager.syncRegistration(desired: self.launchAtLogin)
         self.reloadFleetEntry()
-        self.fleetWatcher = FleetFileWatcher(url: FleetFile.defaultPath) { [weak self] in
+        self.fleetWatcher = ConfigFileWatcher(url: FleetFile.defaultPath) { [weak self] in
             self?.reloadFleetEntry()
+        }
+        self.reloadWorkspaces()
+        self.workspaceWatcher = ConfigFileWatcher(url: WorkspaceFile.defaultPath) { [weak self] in
+            self?.reloadWorkspaces()
         }
     }
 
@@ -132,6 +148,61 @@ final class AppSettings: ObservableObject {
         let url = FleetFile.defaultPath
         self.fleetFileExists = FileManager.default.fileExists(atPath: url.path)
         self.fleetEntry = FleetFile.load(from: url, forHost: self.hostName)
+    }
+
+    // MARK: - Spaces
+
+    /// Branding of a Space, or nil when Spaces are off, the Space hosts a
+    /// fullscreen app, or nobody tagged it (machine identity renders alone).
+    func spaceIdentity(for space: SpaceInfo?) -> SpaceIdentity? {
+        guard self.spacesEnabled, let space, !space.isFullscreen,
+              let entry = WorkspaceFile.entry(
+                  in: self.hostWorkspaces,
+                  spaceUUID: space.uuid,
+                  spaceIndex: space.index)
+        else { return nil }
+        return SpaceIdentity(entry: entry, index: space.index)
+    }
+
+    func workspaceEntry(forSpaceUUID uuid: String, index: Int?) -> WorkspaceEntry? {
+        WorkspaceFile.entry(in: self.hostWorkspaces, spaceUUID: uuid, spaceIndex: index)
+    }
+
+    /// Writes through to workspaces.json; the file watcher reloads state, so
+    /// external edits and in-app edits follow the same path.
+    func setWorkspaceEntry(_ entry: WorkspaceEntry?, forSpaceUUID uuid: String) {
+        self.mutateWorkspaces { host in
+            if let entry, !entry.isEmpty {
+                host.spaces[uuid] = entry
+            } else {
+                host.spaces.removeValue(forKey: uuid)
+            }
+        }
+    }
+
+    func reloadWorkspaces() {
+        let url = WorkspaceFile.defaultPath
+        self.workspaceFileExists = FileManager.default.fileExists(atPath: url.path)
+        self.hostWorkspaces = WorkspaceFile.load(from: url, forHost: self.hostName)
+    }
+
+    private func mutateWorkspaces(_ mutate: (inout HostWorkspaces) -> Void) {
+        let url = WorkspaceFile.defaultPath
+        var all = WorkspaceFile.loadAll(from: url)
+        let host = Hostnames.short(self.hostName)
+        var entry = all[host] ?? HostWorkspaces()
+        mutate(&entry)
+        if entry.spaces.isEmpty {
+            all.removeValue(forKey: host)
+        } else {
+            all[host] = entry
+        }
+        do {
+            try WorkspaceFile.save(all, to: url)
+        } catch {
+            NSLog("Nameplate: writing workspaces file failed: \(error)")
+        }
+        self.reloadWorkspaces()
     }
 }
 
@@ -178,10 +249,10 @@ enum LaunchAtLoginManager {
     }
 }
 
-/// Watches the fleet file (and keeps watching across replace-writes, which is
-/// how editors and `mv`-based syncs update it).
+/// Watches a config file (fleet.json, workspaces.json) and keeps watching
+/// across replace-writes, which is how editors and `mv`-based syncs update it.
 @MainActor
-final class FleetFileWatcher {
+final class ConfigFileWatcher {
     private let url: URL
     private let onChange: @MainActor () -> Void
     private var source: DispatchSourceFileSystemObject?

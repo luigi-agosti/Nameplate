@@ -7,9 +7,11 @@ import NameplateCore
 @MainActor
 final class StatusItemController: NSObject, NSMenuDelegate {
     private let settings: AppSettings
+    private let spaceMonitor: SpaceMonitor
     private unowned let services: AppServices
     private var statusItem: NSStatusItem?
     private var cancellable: AnyCancellable?
+    private var spaceCancellable: AnyCancellable?
 
     private let headerItem = NSMenuItem()
     private let uptimeItem = NSMenuItem()
@@ -24,8 +26,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private var copyableIP: String?
 
-    init(settings: AppSettings, services: AppServices) {
+    init(settings: AppSettings, spaceMonitor: SpaceMonitor, services: AppServices) {
         self.settings = settings
+        self.spaceMonitor = spaceMonitor
         self.services = services
         super.init()
 
@@ -43,6 +46,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                     self?.applyAppearance()
                 }
             }
+        self.spaceCancellable = spaceMonitor.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.applyAppearance()
+                }
+            }
     }
 
     private func applyAppearance() {
@@ -50,8 +60,19 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let identity = self.settings.identity
         button.image = StatusItemIcon.image(for: identity)
         button.imagePosition = .imageLeading
-        button.title = self.settings.showNameInMenuBar ? " \(identity.name)" : ""
+        var title = identity.name
+        if self.settings.spaceInMenuBar, let space = self.currentSpaceIdentity {
+            title += " · \(space.name)"
+        }
+        button.title = self.settings.showNameInMenuBar ? " \(title)" : ""
         statusItem.isVisible = !self.settings.hideMenuBarIcon
+    }
+
+    /// The primary display's active Space (the one whose menu bar this is,
+    /// as far as a single NSStatusItem can tell).
+    private var currentSpaceIdentity: SpaceIdentity? {
+        self.settings.spaceIdentity(
+            for: self.spaceMonitor.current(onDisplay: NSScreen.screens.first?.displayUUID))
     }
 
     private func buildMenu() -> NSMenu {

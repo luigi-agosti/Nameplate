@@ -30,9 +30,13 @@ extension AppSettings {
 /// Nameplate never touches the actual desktop background.
 struct OverlayView: View {
     @ObservedObject var settings: AppSettings
+    @ObservedObject var spaces: SpaceMonitor
+    var displayUUID: String?
 
     var body: some View {
         let identity = self.settings.identity
+        let space = self.settings.spaceIdentity(
+            for: self.spaces.current(onDisplay: self.displayUUID))
         ZStack {
             if self.settings.frameEnabled {
                 self.settings.frameShape()
@@ -52,7 +56,10 @@ struct OverlayView: View {
             }
 
             if self.settings.tagEnabled {
-                NameTagPill(identity: identity, showsGlyph: self.settings.tagShowsGlyph)
+                NameTagPill(
+                    identity: identity,
+                    space: self.settings.spaceInTag ? space : nil,
+                    showsGlyph: self.settings.tagShowsGlyph)
                     .frame(
                         maxWidth: .infinity,
                         maxHeight: .infinity,
@@ -71,24 +78,44 @@ struct OverlayView: View {
 
 struct NameTagPill: View {
     let identity: MacIdentity
+    var space: SpaceIdentity? = nil
     var showsGlyph: Bool = true
     var scale: CGFloat = 1
 
     var body: some View {
+        HStack(spacing: 0) {
+            self.segment(
+                glyph: self.identity.glyph,
+                name: self.identity.name,
+                text: self.identity.textOnColor)
+
+            if let space {
+                self.segment(glyph: "", name: space.name, text: self.identity.textOnColor)
+                    .overlay(alignment: .leading) {
+                        Rectangle()
+                            .fill(self.identity.textOnColor.opacity(0.3))
+                            .frame(width: 1)
+                    }
+            }
+        }
+        .background(self.identity.color)
+        .clipShape(Capsule())
+        .shadow(color: .black.opacity(0.35), radius: 3 * self.scale, y: 1 * self.scale)
+    }
+
+    private func segment(glyph: String, name: String, text: Color) -> some View {
         HStack(spacing: 5 * self.scale) {
-            if self.showsGlyph, !self.identity.glyph.isEmpty {
-                Text(self.identity.glyph)
+            if self.showsGlyph, !glyph.isEmpty {
+                Text(glyph)
                     .font(.system(size: 12 * self.scale))
             }
-            Text(self.identity.name)
+            Text(name)
                 .font(.system(size: 12 * self.scale, weight: .semibold, design: .rounded))
                 .lineLimit(1)
         }
-        .foregroundStyle(self.identity.textOnColor)
+        .foregroundStyle(text)
         .padding(.horizontal, 10 * self.scale)
         .padding(.vertical, 4 * self.scale)
-        .background(self.identity.color, in: Capsule())
-        .shadow(color: .black.opacity(0.35), radius: 3 * self.scale, y: 1 * self.scale)
     }
 }
 

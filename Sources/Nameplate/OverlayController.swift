@@ -35,13 +35,15 @@ enum OverlayPanelFactory {
 final class OverlayController {
     private let settings: AppSettings
     private let remoteMonitor: RemoteViewMonitor
+    private let spaceMonitor: SpaceMonitor
     private var panels: [(panel: NSPanel, screen: NSScreen)] = []
     private var cancellable: AnyCancellable?
     // App-lifetime object: observers are registered once and never removed.
 
-    init(settings: AppSettings, remoteMonitor: RemoteViewMonitor) {
+    init(settings: AppSettings, remoteMonitor: RemoteViewMonitor, spaceMonitor: SpaceMonitor) {
         self.settings = settings
         self.remoteMonitor = remoteMonitor
+        self.spaceMonitor = spaceMonitor
         self.rebuildPanels()
 
         // objectWillChange fires before the write lands; hop once so we read
@@ -88,7 +90,10 @@ final class OverlayController {
             // stays below pop-up menus. Anything higher (.screenSaver) blocks
             // NSMenu from opening at all.
             let panel = OverlayPanelFactory.makePanel(for: screen, level: .statusBar)
-            panel.contentView = NSHostingView(rootView: OverlayView(settings: self.settings))
+            panel.contentView = NSHostingView(rootView: OverlayView(
+                settings: self.settings,
+                spaces: self.spaceMonitor,
+                displayUUID: screen.displayUUID))
             panel.setFrame(screen.frame, display: true)
             return (panel, screen)
         }

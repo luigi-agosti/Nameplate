@@ -36,12 +36,23 @@ final class SplashController {
         guard !screens.isEmpty else { return }
         self.lastShownAt = ContinuousClock.now
 
+        self.present(
+            identity: self.settings.identity,
+            holdDuration: self.settings.splashDuration,
+            on: screens)
+    }
+
+    /// Brief banner on the display whose Space just changed. Skips the wake
+    /// debounce — replacing the previous banner is the debounce.
+    func showSpace(_ identity: MacIdentity, on screen: NSScreen) {
+        guard self.screenFilter?(screen) ?? true else { return }
+        self.present(identity: identity, holdDuration: 1.2, on: [screen])
+    }
+
+    private func present(identity: MacIdentity, holdDuration: Double, on screens: [NSScreen]) {
         self.dismissImmediately()
         self.generation += 1
         let generation = self.generation
-
-        let identity = self.settings.identity
-        let holdDuration = self.settings.splashDuration
 
         self.panels = screens.map { screen in
             let panel = OverlayPanelFactory.makePanel(

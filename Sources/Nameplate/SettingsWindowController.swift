@@ -56,6 +56,9 @@ final class SettingsWindowController {
             .layers, symbol: "square.3.layers.3d", height: 680,
             view: LayersSettingsPane(settings: settings))
         addPane(
+            .spaces, symbol: "macwindow.on.rectangle", height: 620,
+            view: SpacesSettingsPane(settings: settings, spaces: services.spaceMonitor))
+        addPane(
             .splash, symbol: "sparkles.rectangle.stack", height: 560,
             view: SplashSettingsPane(settings: settings, services: services))
         addPane(
